@@ -1,0 +1,176 @@
+using System;
+
+public class Personagem
+{
+  public string Nome { get; protected set; }
+  public int VidaAtual { get; protected set; }
+  public int VidaMaxima { get; protected set; }
+  public int AtaqueBase { get; protected set; }
+
+  public Personagem(string nome, int vidaMaxima, int ataqueBase)
+  {
+    Nome = nome;
+    VidaMaxima = vidaMaxima;
+    VidaAtual = vidaMaxima;
+    AtaqueBase = ataqueBase;
+  }
+
+  public virtual void Atacar(Personagem alvo)
+  {
+    int dano = AtaqueBase;
+    Console.WriteLine($"{Nome} ataca {alvo.Nome} causando {dano} de dano!");
+    alvo.ReceberDano(dano);
+  }
+
+  public virtual void UsarHabilidade(Personagem alvo)
+  {
+    Console.WriteLine($"{Nome} não tem uma habilidade especial.");
+  }
+
+  public void ReceberDano(int dano)
+  {
+    VidaAtual -= dano;
+    Console.WriteLine($"{Nome} recebeu {dano} de dano. Vida atual: {VidaAtual}/{VidaMaxima}");
+    if (VidaAtual<= 0)
+    {
+      Console.WriteLine($"{Nome} foi derrotado!");
+    }
+  }
+
+  public bool EstaVivo()
+  {
+    return VidaAtual > 0;
+  }
+
+  public void ExibirStatus()
+  {
+    Console.WriteLine($"Nome: {Nome} | Vida:{VidaAtual}/{VidaMaxima}");
+  }
+}
+
+public class Mago : Personagem
+{
+  public Mago(string nome) : base(nome, 80, 10)
+  {
+
+  }
+
+  public override void UsarHabilidade(Personagem alvo)
+  {
+    int danoMagico = AtaqueBase + 20;
+    Console.WriteLine($"{Nome} conjura uma **Bola de Fogo** em {alvo.Nome} causando {danoMagico} de dano mágico!");
+    alvo.ReceberDano(danoMagico);
+  }
+}
+
+public class Guerreiro : Personagem
+{
+  public Guerreiro(string nome) : base(nome, 120, 15)
+  {
+
+  }
+
+  public override void Atacar(Personagem alvo)
+  {
+    int dano = AtaqueBase + 5;
+    Console.WriteLine($"{Nome} desfere um golpe poderoso em {alvo.Nome} causando {dano} de dano!");
+    alvo.ReceberDano(dano);
+  }
+
+  public override void UsarHabilidade(Personagem alvo)
+  {
+    int danoHabilidade = AtaqueBase * 2;
+    Console.WriteLine($"{Nome} usa **Investida Feroz** em {alvo.Nome} causando {danoHabilidade} de dano!");
+    alvo.ReceberDano(danoHabilidade);
+  }
+}
+
+public class Monstro : Personagem
+{
+  public Monstro(string nome, int vida, int ataque) : base(nome, vida, ataque)
+  {
+
+  }
+  public override void Atacar(Personagem alvo)
+  {
+    int dano = AtaqueBase + 2;
+    Console.WriteLine($"{Nome} morde {alvo.Nome} causando {dano} de dano!");
+    alvo.ReceberDano(dano);
+  }
+}
+
+class Program
+{
+  static void Main(string[] args)
+  {
+    Console.WriteLine("Bem-vindo ao Mini Jogo de Combate POO!");
+    Console.WriteLine("Escolha seu herói: ");
+    Console.WriteLine("1. Guerreiro (Ataque Forte, Habilidade: Investida Feroz)");
+    Console.WriteLine("2. Mago (Ataque Normal, Habilidade: Bola de Fogo)");
+    Console.Write("Digite o número da sua escolha: ");
+
+    Personagem heroi;
+    string escolha = Console.ReadLine();
+
+    switch (escolha)
+    {
+      case "1":
+          heroi = new Guerreiro("Sir Arthur");
+          break;
+      case "2":
+          heroi = new Mago("Merlin");
+          break;
+      default:
+        Console.WriteLine("Escolha inválida. Você será um Guerreiro por padrão.");
+        heroi = new Guerreiro("Sir Arthur");
+        break;
+    }
+    Monstro monstro = new Monstro("Goblin", 60, 10);
+    Console.WriteLine($"\n{heroi.Nome} vs {monstro.Nome}!");
+
+    while (heroi.EstaVivo() && monstro.EstaVivo())
+    {
+      Console.WriteLine("\n--- Seu Turno ---");
+      heroi.ExibirStatus();
+      monstro.ExibirStatus();
+
+      Console.WriteLine("Escolha sua ação:");
+      Console.WriteLine("1. Atacar");
+      Console.WriteLine("2. Usar Habilidade Especial");
+      Console.Write("Digite o número de sua ação: ");
+      string acao = Console.ReadLine();
+
+      switch (acao)
+      {
+        case "1":
+            heroi.Atacar(monstro);
+            break;
+        case "2":
+              heroi.UsarHabilidade(monstro);
+            break;
+        default:
+              Console.WriteLine("Ação inválida. VocÊ perdeu o turno!");
+            break;
+      }
+
+      if (!monstro.EstaVivo())
+      {
+        Console.WriteLine($"\n{monstro.Nome} foi derrotado! {heroi.Nome} venceu!");
+        break;
+      }
+
+      Console.WriteLine("\n--- Turno do Monstro ---");
+      monstro.Atacar(heroi);
+
+      if (!heroi.EstaVivo())
+      {
+        Console.WriteLine($"\n{heroi.Nome} foi derrotado! {monstro.Nome} venceu!");
+        break;
+      }
+
+      Console.WriteLine("\nPressione Enter para continuar...");
+      Console.ReadLine();
+    }
+    Console.WriteLine("\nFim do jogo");
+  }
+}
